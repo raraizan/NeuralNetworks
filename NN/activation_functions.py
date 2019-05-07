@@ -1,17 +1,24 @@
-# import numpy as np
+import numpy as np
 
-# #### Funciones varias
-# def sigmoid(z):
-#     """
-#     La funcion sigmoide
-#     """
-#     return 1.0 / (1.0 + np.exp(-z))
+# Functions here must be compatible with numpy's ndarray
 
-# def sigmoid_prime(z):
-#     """
-#     Derivada de la funcion sigmoide.
-#     """
-#     return sigmoid(z) * (1 - sigmoid(z))
 
-# def heavyside(x):
-#     return 0.5 * (np.sign(x) + 1)
+def sigmoid(x):
+    """
+    Sigmoid function
+    """
+    return 1.0 / (1.0 + np.exp(-x))
+
+
+def sigmoid_prime(x):
+    """
+    Sigmoid's derivative
+    """
+    return sigmoid(x) * (1.0 - sigmoid(x))
+
+
+def heaviside(x):
+    """
+    Heaviside function
+    """
+    return 0.5 * (np.sign(x) + 1.0)

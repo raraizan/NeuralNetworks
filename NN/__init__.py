@@ -3,7 +3,34 @@ import json
 
 import numpy as np
 
-# from .activation_functions import sigmoid, sigmoid_prime
+from .activation_functions import heaviside
+
+class Perceptron:
+    """ 
+    Simple perceptron.
+
+    Attributes: 
+        bias (float): Threshold value before the perceptron activates. 
+        weights (numpy.ndarray): The wheights used to activate the perceptron. 
+    """
+    def __init__(self, weights, bias, activation_function=None):
+        self.weights = weights
+        self.bias = bias
+        self.activation_function = activation_function if activation_function else heaviside
+
+    def evaluate(self, input_vector):
+        """
+        Evaluates the dot product between the weights and the input.
+
+        Parameters:
+            input_vector (numpy.ndarray): Input values to be evaluated by the perceptron.
+
+        Returns:
+            Integer: 1 if the product is grater than the bias, 0 otherwise.
+        """
+        value = self.activation_function(self.weights.dot(input_vector))
+
+        return value
 
 
 # class MLP:
