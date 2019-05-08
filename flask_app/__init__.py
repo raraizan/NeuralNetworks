@@ -3,7 +3,6 @@ import json
 
 from flask import Flask, Response, render_template, request, url_for
 import numpy
-from flask_cors import CORS
 
 import nn
 
@@ -11,7 +10,6 @@ DATASETS_PATH = 'flask_app/datasets'
 MODELS_PATH = 'flask_app/models'
 
 app = Flask(__name__)
-CORS(app)
 
 neural_network = nn.NeuralNetwork()
 
