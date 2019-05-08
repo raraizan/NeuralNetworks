@@ -5,10 +5,8 @@ requerido:
 
 Para iniciar el proyecto
 
-    pip install virtualenv
-    virtualenv venv && source venv/bin/activate
     pip install -r requirements.txt
-    export FLASK_APP=flask_app
+    source setup.sh                                             
 
 y por último
 

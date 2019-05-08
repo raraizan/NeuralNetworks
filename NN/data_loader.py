@@ -3,6 +3,8 @@ import gzip
 
 import numpy
 
+from .misc import *
+
 
 def load_data(path):
     with gzip.open(path, 'rb') as f: 

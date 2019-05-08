@@ -6,13 +6,19 @@ import numpy
 
 from .activation_functions import heaviside, sigmoid, sigmoid_prime
 from .exceptions import PerceptronNotInitialized
+from .misc import *
 
+ACTIVATION_FUNCTIONS = {
+    'sigmoid': sigmoid,
+    'heaviside': heaviside,
+}
 
 class Perceptron:
     def __init__(self, weights, bias, activation_function=None):
         self.weights = weights
         self.bias = bias
-        self.activation_function = activation_function if activation_function else heaviside
+        self.activation_function_key = activation_function if activation_function else 'heaviside'
+        self.activation_function = ACTIVATION_FUNCTIONS[self.activation_function_key]
 
     def feedforward(self, input_vector):
         value = self.activation_function(self.weights.dot(input_vector))
@@ -22,13 +28,15 @@ class Perceptron:
 class MultiLayeredPerceptron:
     def __init__(self):
         self.initialized = False
+        self.activation_function = sigmoid
 
     def create(self, sizes, activation_function=None):
         self.num_layers = len(sizes)
         self.sizes = sizes
         self.biases = [numpy.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [numpy.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
-        self.activation_function = activation_function if activation_function else heaviside
+        self.activation_function_key = activation_function if activation_function else 'heaviside'
+        self.activation_function = ACTIVATION_FUNCTIONS[self.activation_function_key]
 
         self.initialized = True
         return self
@@ -49,22 +57,21 @@ class MultiLayeredPerceptron:
             "sizes": self.sizes,
             "weights": [w.tolist() for w in self.weights],
             "biases": [b.tolist() for b in self.biases],
+            "activation_function": self.activation_function_key,
         }
-        
-        prefix = "{}_".format(prefix) if prefix else ""
-        path = '{}/'.format(path) if path else ''
+
         time_stamp = datetime.datetime.now().strftime('%m_%d_%Y_%H:%M:%S')
+        prefix = "{}_{}_{}".format(prefix, self.activation_function_key, time_stamp) if prefix else "{}_{}".format(self.activation_function_key, time_stamp)
+        path = '{}/{}'.format(path, prefix) if path else prefix
+        filename = "{}.json".format(path)
 
-        filename = "{}{}model_{}.json".format(path, prefix, time_stamp)
+        with open(filename, 'w+') as f:
+            json.dump(data, f)
 
-        f = open(filename, 'w+')
-        json.dump(data, f)
-        f.close() 
-
-    def load(self, filename): 
-        with open(filename, "r") as f: 
-            data = json.load(f) 
-            f.close() 
+    def load(self, filename, path=None):
+        path = '{}/{}'.format(path, filename) if path else filename
+        with open(path, "r") as f: 
+            data = json.load(f)
  
             sizes = data["sizes"] 
  
@@ -72,6 +79,9 @@ class MultiLayeredPerceptron:
             self.sizes = tuple(sizes)
             self.weights = [numpy.array(w) for w in data["weights"]] 
             self.biases = [numpy.array(b) for b in data["biases"]]
+            self.activation_function_key = data["activation_function"]
+            self.activation_function = ACTIVATION_FUNCTIONS[self.activation_function_key]
+
         self.initialized = True
         return self
 
@@ -92,13 +102,11 @@ class NeuralNetwork(MultiLayeredPerceptron):
             for mini_batch in mini_batches:
                 self.update_parameters(mini_batch, eta)
 
-            # if test_data:
-            #     percentil = 100 * (self.evaluate(test_data) / n_test)
-            #     self.history.update( {j: [percentil, self.weights]})
-                # print("Epoch {} : {} accurate".format(j, percentil))
-            # else:
-            #     print("Epoch {} complete".format(j))
-            print("Epoch {} complete".format(j))
+            if test_data:
+                percentil = (100.0 / n_test) * self.evaluate(test_data)
+                print("Epoch {} : {} accurate".format(j, percentil))
+            else:
+                print("Epoch {} complete".format(j + 1))
 
     def update_parameters(self, mini_batch, eta):
         nabla_b = [numpy.zeros_like(b) for b in self.biases]
@@ -128,7 +136,7 @@ class NeuralNetwork(MultiLayeredPerceptron):
             activation = sigmoid(z)
             activations.append(activation)
 
-        # Paso hacia atras
+        # Back step
         delta = self.cost_derivative(activations[-1], tag) * sigmoid_prime(zs[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = numpy.dot(delta, activations[-2].transpose())
@@ -143,9 +151,15 @@ class NeuralNetwork(MultiLayeredPerceptron):
         return (nabla_b, nabla_w)
 
     def evaluate(self, test_data):
-        test_results = [(numpy.argmax(self.feedforward(x)), y) for (x, y) in test_data]
+        test_results = [(get_category(self.feedforward(x)), get_category(y)) for (x, y) in test_data]
 
-        return sum(int(x == y) for (x, y) in test_results)
+        value = 0
+
+        for i, j in test_results:
+            if i == j:
+                value += 1
+
+        return value
 
     def cost_derivative(self, output_activations, y):
         return output_activations - y
