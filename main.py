@@ -15,11 +15,17 @@ DATASETS_PATH = 'datasets/mnist.pkl.gz'
 training_data, validation_data, test_data = load_data_wrapper(DATASETS_PATH)
 
 first_nn = NeuralNetwork()
-first_nn.create((784, 10), activation_function=sigmoid)
+first_nn.create((784, 40, 10), activation_function=sigmoid)
 
-# images = tuple(numpy.reshape(flat_data, (28, 28)) for flat_data in test_data[0])
 
 # Pick random 
 sample = random.choice(training_data)
+print(first_nn.feedforward(sample[0]))
+
+first_nn.train_model(training_data, 30, 30, 0.1)
 
 print(first_nn.feedforward(sample[0]))
+print(sample[1])
+image = numpy.reshape(sample[0][:,0], (28, 28))
+plt.imshow(image)
+plt.show()

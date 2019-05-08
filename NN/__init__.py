@@ -4,7 +4,7 @@ import datetime
 
 import numpy
 
-from .activation_functions import heaviside, sigmoid
+from .activation_functions import heaviside, sigmoid, sigmoid_prime
 from .exceptions import PerceptronNotInitialized
 
 
@@ -78,15 +78,15 @@ class MultiLayeredPerceptron:
 
 class NeuralNetwork(MultiLayeredPerceptron):
     def train_model(self, training_data, epochs, mini_batch_size, eta, test_data=None):
-        # training_data = list(training_data)
+        training_data = list(training_data)
         n = len(training_data)
 
         if test_data:
-            # test_data = list(test_data)
+            test_data = list(test_data)
             n_test = len(test_data)
 
         for j in range(epochs):
-            numpy.random.shuffle(training_data)
+            random.shuffle(training_data)
             mini_batches = [training_data[k:k + mini_batch_size] for k in range(0, n, mini_batch_size)]
 
             for mini_batch in mini_batches:
@@ -165,4 +165,4 @@ class NeuralNetwork(MultiLayeredPerceptron):
         Regresa el vector de derivadas parciales para las
         activaciones de salida.
         """
-        return (output_activations-y)
+        return output_activations - y
