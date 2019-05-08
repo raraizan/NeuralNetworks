@@ -1,0 +1,2 @@
+class PerceptronNotInitialized(Exception):
+    pass

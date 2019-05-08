@@ -1,13 +1,12 @@
-import numpy as np
+import numpy
 
 # Functions here must be compatible with numpy's ndarray
-
 
 def sigmoid(x):
     """
     Sigmoid function
     """
-    return 1.0 / (1.0 + np.exp(-x))
+    return 1.0 / (1.0 + numpy.exp(-x))
 
 
 def sigmoid_prime(x):
@@ -21,4 +20,4 @@ def heaviside(x):
     """
     Heaviside function
     """
-    return 0.5 * (np.sign(x) + 1.0)
+    return numpy.heaviside(x, 0)

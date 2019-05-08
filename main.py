@@ -1,15 +1,12 @@
-import NN.neural_network
-import NN.mnist_loader
-import datetime
+import numpy
+from pprint import pprint
+import nn
 
-net = neural_network.MLP([784, 100, 30, 10])
+mlp = nn.MultiLayeredPerceptron()
+mlp.create([2,4,1])
+# mlp.load('models/model_05_07_2019_19:01:46.json')
 
-training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
+vec = numpy.array([1,4])
 
-net.SGD(training_data, 100, 25, 0.1, test_data=validation_data)
-
-net.save(
-    'models/MLP_{}.json'.format(
-        datetime.datetime.now(),
-    ),
-)
+result = mlp.feedforward(vec)
+pprint(result)
