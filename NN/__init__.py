@@ -114,20 +114,13 @@ class NeuralNetwork(MultiLayeredPerceptron):
         self.biases = [b - (eta / len(mini_batch)) * nb for b, nb in zip(self.biases, nabla_b)]
 
     def backprop(self, sample, tag):
-        """
-        Regresa una tupla ``(nabla_b, nabla_w)`` que representa
-        el gradiente de la funcion de costo C_x. ``nabla_b`` y
-        ``nabla_w`` son, capa por capa, listas de arreglos,
-        similares a ``self.biases`` y ``self.weights``.
-        """
-
         nabla_b = [numpy.zeros(b.shape) for b in self.biases]
         nabla_w = [numpy.zeros(w.shape) for w in self.weights]
 
         # feedforward
         activation = sample
-        activations = [sample] # Lista para gardar todas las activaciones capa por capa
-        zs = [] # lista para guardar los vectores z capa por capa
+        activations = [sample]
+        zs = []
 
         for b, w in zip(self.biases, self.weights):
             z = numpy.dot(w, activation) + b
@@ -150,19 +143,9 @@ class NeuralNetwork(MultiLayeredPerceptron):
         return (nabla_b, nabla_w)
 
     def evaluate(self, test_data):
-        """
-        Regresa el numero de entradas para las cuales la red entrego
-        el resultado correcto. Nota que la salida de la red neuronal
-        es el indice de la neurona con mayor activacion en la capa
-        final.
-        """
         test_results = [(numpy.argmax(self.feedforward(x)), y) for (x, y) in test_data]
 
         return sum(int(x == y) for (x, y) in test_results)
 
     def cost_derivative(self, output_activations, y):
-        """
-        Regresa el vector de derivadas parciales para las
-        activaciones de salida.
-        """
         return output_activations - y
