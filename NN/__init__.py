@@ -6,7 +6,7 @@ import numpy
 
 from .activation_functions import heaviside, sigmoid, sigmoid_prime
 from .cost_funtions import square_error
-from .exceptions import PerceptronNotInitialized
+from .exceptions import InitializationError
 from .misc import *
 
 ACTIVATION_FUNCTIONS = {
@@ -19,7 +19,7 @@ class Perceptron:
     def __init__(self, weights, bias, activation_function=None):
         self.weights = numpy.array(weights)
         self.bias = bias
-        self.activation_function = activation_function if activation_function else heaviside
+        self.activation_function = ACTIVATION_FUNCTIONS[activation_function] if activation_function else heaviside
         
     def __str__(self):
         print("Perceptron initialized with:")
@@ -76,30 +76,30 @@ class Perceptron:
 class MultiLayeredPerceptron:
     def __init__(self):
         self.initialized = False
-        self.activation_function = sigmoid
 
     def create(self, sizes, activation_function=None):
         self.num_layers = len(sizes)
         self.sizes = sizes
         self.biases = [numpy.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [numpy.random.randn(y, x) for x, y in zip(sizes[:-1], sizes[1:])]
+
         self.activation_function_key = activation_function if activation_function else 'heaviside'
         self.activation_function = ACTIVATION_FUNCTIONS[self.activation_function_key]
 
         self.initialized = True
         return self
 
-    def feedforward(self, a):
+    def feedforward(self, input_vector):
         if not self.initialized:
-            raise PerceptronNotInitialized
-        
-        for b, w in zip(self.biases, self.weights):
-            a = self.activation_function(numpy.dot(w, a) + b)
-        return a
+            raise InitializationError
+
+        for bias, weights in zip(self.biases, self.weights):
+            input_vector = self.activation_function(numpy.dot(weights, input_vector) + bias)
+        return input_vector
 
     def save(self, path=None, prefix=None):
         if not self.initialized:
-            raise PerceptronNotInitialized
+            raise InitializationError
         
         data = {
             "sizes": self.sizes,

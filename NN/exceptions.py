@@ -1,2 +1,2 @@
-class PerceptronNotInitialized(Exception):
+class InitializationError(Exception):
     pass
