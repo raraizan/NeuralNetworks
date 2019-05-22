@@ -1,6 +1,5 @@
 .DS_Store
 .vscode/
-__pycache__
-venv
-
-datasets/
+__pycache__/
+venv/
+.ipynb_checkpoints/

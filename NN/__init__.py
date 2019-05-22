@@ -5,6 +5,7 @@ import datetime
 import numpy
 
 from .activation_functions import heaviside, sigmoid, sigmoid_prime
+from .cost_funtions import square_error
 from .exceptions import PerceptronNotInitialized
 from .misc import *
 
@@ -13,16 +14,63 @@ ACTIVATION_FUNCTIONS = {
     'heaviside': heaviside,
 }
 
+# Perceptron class
 class Perceptron:
     def __init__(self, weights, bias, activation_function=None):
-        self.weights = weights
+        self.weights = numpy.array(weights)
         self.bias = bias
-        self.activation_function_key = activation_function if activation_function else 'heaviside'
-        self.activation_function = ACTIVATION_FUNCTIONS[self.activation_function_key]
+        self.activation_function = activation_function if activation_function else heaviside
+        
+    def __str__(self):
+        print("Perceptron initialized with:")
+        print("{} weights, {}".format(len(self.weights), self.weights))
+        print("{} as bias".format(self.bias))
 
     def feedforward(self, input_vector):
-        value = self.activation_function(self.weights.dot(input_vector))
+        value = self.activation_function(self.weights.dot(input_vector) - self.bias)
         return value
+    
+    def train(self, dataset, subsets=10, max_iters=100, eps=1e-16, cost_function=None):
+        
+        cost_funtion = cost_function if cost_function else square_error
+
+        counter = 0
+        epsilon = 1e-16
+
+        self.error_history = []
+        self.params_history = []
+        best_params = self.weights, self.bias
+        best_error = cost_funtion(dataset, self.feedforward)
+        print("initial error: {}".format(best_error))
+
+        while best_error > eps and counter < max_iters:
+            # Generate a set of variations from the initial params
+            param_variations = [
+                (
+                    numpy.array(
+                        tuple([random.gauss(weight, best_error) for weight in best_params[0]]),
+                    ),
+                    random.gauss(best_params[1], best_error),
+                ) for _ in range(10)]
+
+            # Evaluate all and find the best
+            for i, params in enumerate(param_variations):
+                self.weights, self.bias = params
+
+                current_error = cost_funtion(dataset, self.feedforward)
+                if  current_error <= best_error:
+                    best_error = current_error
+                    best_params = params
+            
+            self.error_history.append(best_error)
+            self.params_history.append(best_params)
+
+            counter += 1
+        
+        final_error = square_error(dataset, self.feedforward)
+        print("final error: {} reached in {} iterations".format(final_error, counter))
+
+        return self.error_history, self.params_history
 
 
 class MultiLayeredPerceptron:
